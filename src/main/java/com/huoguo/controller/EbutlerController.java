@@ -131,6 +131,7 @@ public class EbutlerController {
                 idList.add(Integer.valueOf(s));
             }
             siteRepo.deleteAllById(idList);
+            lineRepo.deleteBySiteIds(idList);
             customerRepo.deleteBySiteIds(idList);
             return null;
         });
@@ -148,6 +149,7 @@ public class EbutlerController {
                 lineRepo.save(line);
             } else {
                 customerRepo.updateLineName(line.getId(), line.getName());
+                trySetSiteId(line);
                 lineRepo.save(line);
             }
             return null;
@@ -307,5 +309,10 @@ public class EbutlerController {
                 .contentType(MediaType.parseMediaType("application/octet-stream"))
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"")
                 .body(resource);
+    }
+
+    private void trySetSiteId(EbutlerLine line) {
+        EbutlerLine entity = lineRepo.findById(line.getId()).get();
+        line.setSiteId(entity.getSiteId());
     }
 }

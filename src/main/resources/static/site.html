@@ -197,10 +197,10 @@
                     // 将 Uint8Array 转换为 Base64 字符串
                     const base64String = btoa(String.fromCharCode.apply(null, uint8Array));
                     const cardHtml = `
-                <div class="col-md-4 col-lg-3 mb-3">
+                <div class="col-md-4 col-lg-4 mb-4">
                   <div class="card model-card">
                     <div class="card-body">
-                      <h2 class="card-title">${station.name}</h2>
+                      <h3 class="card-title">${station.name}</h3>
                       <div class="d-flex justify-content-between">
                         <button class="btn btn-mini btn-primary" type="button" onclick="location.href='line.html?siteId=${station.id}'">查看线路</button>
                         <button class="btn btn-mini btn-default" type="button" onclick="showModify('${base64String}')">修改</button>
