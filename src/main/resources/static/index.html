@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" type="image/png" sizes="32x32" href="icon.png">
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/bootstrap-table.css" type="text/css">
+    <script type="text/javascript" src="js/jquery-3.1.1.min.js"></script>
+    <script type="text/javascript" src="js/bootstrap.js"></script>
+    <script src="layui/layui.js"></script>
+    <script src="js/bootstrap-table.js" type="text/javascript"></script>
+    <script src="js/bootstrap-table-zh-CN.js" type="text/javascript"></script>
+    <title>e-butler</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        /* 左侧导航栏样式 */
+        .navbar {
+            width: 200px;
+            background-color: #f9f9f9;
+            border-right: 1px solid #ddd;
+            position: fixed;
+            height: 100%;
+            overflow: auto;
+            padding-top: 20px;
+            transition: all 0.3s ease;
+            transform: translateX(0);
+        }
+        .navbar.collapsed {
+            transform: translateX(-200px);
+        }
+        .navbar a {
+            display: block;
+            color: #000;
+            padding: 10px 16px;
+            text-decoration: none;
+        }
+        .navbar a:hover {
+            background-color: #ddd;
+        }
+
+        /* 右侧内容区样式 */
+        .content {
+            margin-left: 200px; /* 与左侧导航栏宽度一致 */
+            padding: 20px;
+            transition: margin-left 0.3s ease;
+        }
+        .content.collapsed {
+            margin-left: 0;
+        }
+    </style>
+</head>
+<body>
+
+<!-- 左侧导航栏 -->
+<!--<div class="navbar" id="navbar">-->
+<!--    <a href="#" onclick="changeContent('home')" class="glyphicon glyphicon-user">&nbsp;客户管理</a>-->
+<!--    <a href="#" onclick="changeContent('upload')" class="glyphicon glyphicon-cloud-upload">&nbsp;文件上传</a>-->
+<!--</div>-->
+<div class="navbar" id="navbar">
+    <a href="site.html" class="glyphicon glyphicon-cloud">&nbsp;站点管理</a>
+    <a href="line.html" class="glyphicon glyphicon-random">&nbsp;线路管理</a>
+    <a href="index.html" class="glyphicon glyphicon-user">&nbsp;客户管理</a>
+    <a href="upload.html" class="glyphicon glyphicon-cloud-upload">&nbsp;文件上传</a>
+</div>
+
+<!-- 右侧内容区 -->
+<div class="container mt-4" id="content">
+    <div id="home" style="display: block;">
+        <div class="container-lg">
+            <div id="toolbar" class="btn-group">
+                <button type="button" class="btn btn-default glyphicon glyphicon-download-alt" onclick="download()">导出</button>
+                <button id="btn_add" type="button" class="btn btn-default glyphicon glyphicon-plus">添加</button>
+                <button id="btn_edit" type="button" class="btn btn-default glyphicon glyphicon-edit">更新</button>
+                <button id="btn_delete" type="button" class="btn btn-default glyphicon glyphicon-trash" onclick="mydelete()">删除</button>
+            </div>
+            <table id="table" class="table text-nowrap small">
+                <thead>
+                <tr>
+                    <th data-field="check" data-checkbox="true">
+                    </th>
+                    <th data-field="id" data-visible="false">id</th>
+                    <th data-field="siteId" data-visible="false">siteId</th>
+                    <th data-field="lineId" data-visible="false">lineId</th>
+                    <th data-field="siteName">站点</th>
+                    <th data-field="lineName">线路</th>
+                    <th data-field="accountNumber">户号</th>
+                    <th data-field="accountName">户名</th>
+                    <th data-field="customerName">客户号</th>
+                    <th data-field="divisionPoint">产权分界点</th>
+                    <th data-field="capacity">容量</th>
+                    <th data-field="electricalCapacity">电器容量</th>
+                    <th data-field="selfPower">自备电源</th>
+                    <th data-field="telephone">通讯号码</th>
+                    <th data-field="photovoltaicNumber">光伏户号</th>
+                    <th data-field="photovoltaicCapacity">光伏容量</th>
+                    <th data-field="transformerModel">变压器型号</th>
+                    <th data-field="transformerImpedanceVoltage">变压器阻抗电压</th>
+                    <th data-field="createTime" data-visible="false">创建时间</th>
+                    <th data-field="modifyTime" data-visible="false">修改时间</th>
+                    <th data-field="creator" data-visible="false">creator</th>
+                    <th data-field="modifier" data-visible="false">modifier</th>
+                </tr>
+                </thead>
+            </table>
+        </div>
+    </div>
+    <!-- 模态框 -->
+    <div class="modal fade" id="editModal" tabindex="-1" role="dialog" aria-labelledby="editModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editModalLabel">编辑信息</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form>
+                        <div class="form-row" style="display:none;">
+                            <div class="form-group col-md-6">
+                                <label for="id">id</label>
+                                <input type="text" class="form-control" id="id" placeholder="id">
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label for="createTime">createTime</label>
+                                <input type="text" class="form-control" id="createTime" placeholder="createTime">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group col-md-6">
+                                <label for="site">站点</label>
+                                <input type="text" class="form-control" id="site" placeholder="请输入站点">
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label for="line">线路</label>
+                                <input type="text" class="form-control" id="line" placeholder="请输入线路">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group col-md-6">
+                                <label for="accountNumber">户号</label>
+                                <input type="text" class="form-control" id="accountNumber" placeholder="请输入户号">
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label for="accountName">户名</label>
+                                <input type="text" class="form-control" id="accountName" placeholder="请输入户名">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group col-md-6">
+                                <label for="customerNumber">客户号</label>
+                                <input type="text" class="form-control" id="customerNumber" placeholder="请输入客户号">
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label for="propertyBoundary">产权分界点</label>
+                                <input type="text" class="form-control" id="propertyBoundary" placeholder="请输入产权分界点">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group col-md-6">
+                                <label for="capacity">容量</label>
+                                <input type="text" class="form-control" id="capacity" placeholder="请输入容量">
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label for="electricalCapacity">电器容量</label>
+                                <input type="text" class="form-control" id="electricalCapacity" placeholder="请输入电器容量">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group col-md-6">
+                                <label for="selfPowerSupply">自备电源</label>
+                                <input type="text" class="form-control" id="selfPowerSupply" placeholder="请输入自备电源">
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label for="phoneNumber">通讯号码</label>
+                                <input type="text" class="form-control" id="phoneNumber" placeholder="请输入通讯号码">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group col-md-6">
+                                <label for="photovoltaicAccount">光伏户号</label>
+                                <input type="text" class="form-control" id="photovoltaicAccount" placeholder="请输入光伏户号">
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label for="photovoltaicCapacity">光伏容量</label>
+                                <input type="text" class="form-control" id="photovoltaicCapacity" placeholder="请输入光伏容量">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group col-md-6">
+                                <label for="transformerModel">变压器型号</label>
+                                <input type="text" class="form-control" id="transformerModel" placeholder="请输入变压器型号">
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label for="transformerImpedanceVoltage">变压器阻抗电压</label>
+                                <input type="text" class="form-control" id="transformerImpedanceVoltage" placeholder="请输入变压器阻抗电压">
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>
+                    <button type="button" class="btn btn-primary">保存</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="upload" style="display: none;">
+        <div class="container mt-5">
+            <h2>文件上传</h2>
+            <form action="/ebutler/upload" method="post" enctype="multipart/form-data">
+                <div class="mb-3">
+                    <label for="fileInput" class="form-label">选择文件</label>
+                    <input class="form-control" type="file" id="fileInput" name="file">
+                </div>
+                <button type="submit" class="btn btn-primary">上传文件</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    function changeContent(id) {
+        var contents = document.querySelectorAll('#content > div');
+        contents.forEach(function(content) {
+            content.style.display = 'none';
+        });
+        document.getElementById(id).style.display = 'block';
+    }
+
+    function toggleSidebar() {
+        var navbar = document.getElementById('navbar');
+        var content = document.getElementById('content');
+
+        if (navbar.classList.contains('collapsed')) {
+            navbar.classList.remove('collapsed');
+            content.classList.remove('collapsed');
+        } else {
+            navbar.classList.add('collapsed');
+            content.classList.add('collapsed');
+        }
+    }
+
+    function download() {
+        window.open("http://localhost:8080/ebutler/export", "_self");
+    }
+
+    function isNullOrEmpty(value) {
+        return value === null || value === undefined || value === '';
+    }
+
+    $(function () {
+        function queryParams(params) {
+            return {
+                limit: params.limit, // 页面大小
+                offset: params.offset, // 起始位置
+                sort: params.sortName, // 排序字段
+                order: params.sortOrder, // 排序方式
+                search: params.search // 搜索关键词
+            };
+        }
+
+        // 从 URL 中提取查询参数
+        function getQueryParams() {
+            const params = new URLSearchParams(window.location.search);
+            return params.get('search');
+        }
+
+        // 获取查询参数
+        const search = getQueryParams();
+
+        if (!isNullOrEmpty(search)) {
+            $('#table').bootstrapTable({
+                url: '/ebutler/page', // 后端API地址
+                toolbar: '#toolbar', // 工具栏选择器
+                method: 'get', // 使用 get 请求
+                pagination: true, // 显示分页
+                pageSize: 10, // 每页显示记录数
+                pageList: [10, 25, 50, 100], // 分页选项
+                sidePagination: 'server', // 使用服务器端分页
+                queryParams: queryParams, // 自定义请求参数
+                search: true,
+                showRefresh: true,
+                showToggle: true,
+                showColumns: true,
+                searchOnEnterKey: true,
+                searchText: search
+            });
+        } else{
+            $('#table').bootstrapTable({
+                url: '/ebutler/page', // 后端API地址
+                toolbar: '#toolbar', // 工具栏选择器
+                method: 'get', // 使用 get 请求
+                pagination: true, // 显示分页
+                pageSize: 10, // 每页显示记录数
+                pageList: [10, 25, 50, 100], // 分页选项
+                sidePagination: 'server', // 使用服务器端分页
+                queryParams: queryParams, // 自定义请求参数
+                search: true,
+                showRefresh: true,
+                showToggle: true,
+                showColumns: true,
+                searchOnEnterKey: true
+            });
+        }
+
+        // 当点击编辑按钮时触发模态框
+        $('#btn_edit').click(function() {
+            myupdate();
+            // $('#editModal').modal('show');
+        });
+
+        // 当点击添加按钮时触发模态框
+        $('#btn_add').click(function() {
+            $('#editModal').modal('show');
+        });
+
+        // 保存按钮点击事件
+        $('.modal-footer .btn-primary').click(function() {
+            // 收集表单数据
+            var site = $('#site').val();
+            var line = $('#line').val();
+
+            // 关闭模态框
+            $('#editModal').modal('hide');
+
+            var formData = {
+                id: $('#id').val(),
+                createTime: $('#createTime').val(),
+                siteName: $('#site').val(),
+                lineName: $('#line').val(),
+                accountNumber: $('#accountNumber').val(),
+                accountName: $('#accountName').val(),
+                customerName: $('#customerNumber').val(),
+                divisionPoint: $('#propertyBoundary').val(),
+                capacity: $('#capacity').val(),
+                electricalCapacity: $('#electricalCapacity').val(),
+                selfPower: $('#selfPowerSupply').val(),
+                telephone: $('#phoneNumber').val(),
+                photovoltaicNumber: $('#photovoltaicAccount').val(),
+                photovoltaicCapacity: $('#photovoltaicCapacity').val(),
+                transformerModel: $('#transformerModel').val(),
+                transformerImpedanceVoltage: $('#transformerImpedanceVoltage').val()
+            }
+            // 发送请求
+            $.ajax({
+                url: '/ebutler/customer/upsert',
+                type: 'POST',
+                contentType: 'application/json; charset=utf-8', // 设置正确的Content-Type
+                dataType: 'json', // 预期从服务器接收的响应类型
+                data: JSON.stringify(formData), // 将数据序列化为JSON字符串
+                success: function(response) {
+                    if(response.success) {
+                        $('#table').bootstrapTable('refresh');
+                    } else {
+                        alert('请求失败'+response.message);
+                    }
+                },
+                error: function(error) {
+                    console.error('Error occurred:', error);
+                    alert('请求失败，请检查网络或稍后再试');
+                }
+            });
+        });
+    });
+
+    //删除
+    function mydelete(){
+        var ids="";
+        var jsons=$("#table").bootstrapTable("getSelections");
+        for(var i=0;i<jsons.length;i++){
+            var id=jsons[i].id;
+            ids=ids+id+",";
+            $("#mytable").bootstrapTable("removeByUniqueId",id);
+        }
+        $.ajax({
+            type:"post",
+            url:"/ebutler/customer/del?ids="+ids,
+            success: function(response) {
+                if(response.success) {
+                    $('#table').bootstrapTable('refresh');
+                } else {
+                    alert('请求失败'+response.message);
+                }
+            },
+            error: function(error) {
+                console.error('Error occurred:', error);
+                alert('请求失败，请检查网络或稍后再试');
+            }
+        })
+    }
+
+    //更新
+    function myupdate(){
+        var jsons=$("#table").bootstrapTable("getSelections");//获得勾选的行,是一组json对象
+        if(jsons.length!=1){
+            alert("请选择单个进行更新");
+            return;
+        }
+
+        // 填充输入框数据
+        $('#id').val(jsons[0].id);
+        $('#createTime').val(jsons[0].createTime);
+        $('#site').val(jsons[0].siteName);
+        $('#line').val(jsons[0].lineName);
+        $('#accountNumber').val(jsons[0].accountNumber);
+        $('#accountName').val(jsons[0].accountName);
+        $('#customerNumber').val(jsons[0].customerName);
+        $('#propertyBoundary').val(jsons[0].divisionPoint);
+        $('#capacity').val(jsons[0].capacity);
+        $('#electricalCapacity').val(jsons[0].electricalCapacity);
+        $('#selfPowerSupply').val(jsons[0].selfPower);
+        $('#phoneNumber').val(jsons[0].telephone);
+        $('#photovoltaicAccount').val(jsons[0].photovoltaicNumber);
+        $('#photovoltaicCapacity').val(jsons[0].photovoltaicCapacity);
+        $('#transformerModel').val(jsons[0].transformerModel);
+        $('#transformerImpedanceVoltage').val(jsons[0].transformerImpedanceVoltage);
+
+        // 显示模态框
+        $('#editModal').modal('show');
+    }
+</script>
+
+</body>
+</html>

@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" type="image/png" sizes="32x32" href="icon.png">
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/bootstrap-table.css" type="text/css">
+    <script type="text/javascript" src="js/jquery-3.1.1.min.js"></script>
+    <script type="text/javascript" src="js/bootstrap.js"></script>
+    <script src="layui/layui.js"></script>
+    <script src="js/bootstrap-table.js" type="text/javascript"></script>
+    <script src="js/bootstrap-table-zh-CN.js" type="text/javascript"></script>
+    <title>e-butler</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        /* 左侧导航栏样式 */
+        .navbar {
+            width: 200px;
+            background-color: #f9f9f9;
+            border-right: 1px solid #ddd;
+            position: fixed;
+            height: 100%;
+            overflow: auto;
+            padding-top: 20px;
+            transition: all 0.3s ease;
+            transform: translateX(0);
+        }
+        .navbar.collapsed {
+            transform: translateX(-200px);
+        }
+        .navbar a {
+            display: block;
+            color: #000;
+            padding: 10px 16px;
+            text-decoration: none;
+        }
+        .navbar a:hover {
+            background-color: #ddd;
+        }
+
+        /* 右侧内容区样式 */
+        .content {
+            margin-left: 200px; /* 与左侧导航栏宽度一致 */
+            padding: 20px;
+            transition: margin-left 0.3s ease;
+        }
+        .content.collapsed {
+            margin-left: 0;
+        }
+    </style>
+</head>
+<body>
+
+<!-- 左侧导航栏 -->
+<div class="navbar" id="navbar">
+    <a href="site.html" class="glyphicon glyphicon-cloud">&nbsp;站点管理</a>
+    <a href="line.html" class="glyphicon glyphicon-random">&nbsp;线路管理</a>
+    <a href="index.html" class="glyphicon glyphicon-user">&nbsp;客户管理</a>
+    <a href="upload.html" class="glyphicon glyphicon-cloud-upload">&nbsp;文件上传</a>
+</div>
+
+<!-- 右侧内容区 -->
+<div class="container mt-4" id="content">
+    <div id="upload">
+        <div class="container mt-5">
+            <h2>文件上传</h2>
+            <form action="/ebutler/upload" method="post" enctype="multipart/form-data">
+                <div class="mb-3">
+                    <label for="fileInput" class="form-label">选择文件</label>
+                    <input class="form-control" type="file" id="fileInput" name="file">
+                </div>
+                <button type="submit" class="btn btn-primary">上传文件</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
